@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Speeding_Infraction_Management_AF01.Handlers.Interfaces
+namespace Speeding.Infraction.Management.AF01.Handlers.Interfaces
 {
     public interface IBlobHandler
     {

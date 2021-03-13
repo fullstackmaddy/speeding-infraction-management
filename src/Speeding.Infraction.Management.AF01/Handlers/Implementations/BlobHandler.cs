@@ -1,11 +1,11 @@
-﻿using Speeding_Infraction_Management_AF01.Handlers.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using System.IO;
+using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
 
 namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
 {
