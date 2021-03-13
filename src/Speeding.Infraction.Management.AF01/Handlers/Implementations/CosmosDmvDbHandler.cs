@@ -48,7 +48,7 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
 
         }
 
-        public async Task<bool> CreateSpeedingTicket(string ticketNumber, string vehicleRegistrationNumber, string district)
+        public async Task<bool> CreateSpeedingTicketAsync(string ticketNumber, string vehicleRegistrationNumber, string district)
         {
             bool retVal = true;
 

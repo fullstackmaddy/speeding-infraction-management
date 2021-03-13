@@ -7,6 +7,8 @@ using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.Face;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
+using Microsoft.Azure.EventGrid;
+using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +28,12 @@ namespace Speeding.Infraction.Management.AF01
                 .Configure<IConfiguration>((settings, configuration) =>
                 {
                     configuration.GetSection("CosmosDbOptions").Bind(settings);
+                });
+
+            builder.Services.AddOptions<EventGridOptions>()
+                .Configure<IConfiguration>((settings, configuration) =>
+                {
+                    configuration.GetSection("EventGridOptions").Bind(settings);
                 });
 
             builder.Services.AddSingleton<IDocumentClient>(
@@ -65,11 +73,20 @@ namespace Speeding.Infraction.Management.AF01
                             Environment.GetEnvironmentVariable("BlobStorageConnectionKey")
                         )
                 );
+            builder.Services.AddSingleton<IEventGridClient>(
+                    new EventGridClient(
+                            new TopicCredentials(
+                                Environment.GetEnvironmentVariable("CustomEventGridTopicKey")
+                            )
+                        )
+                );
+
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            builder.Services.AddTransient<IBlobHandler, BlobHandler>();
+            builder.Services.AddTransient<IBlobHandler, AzureBlobHandler>();
             builder.Services.AddTransient<IDmvDbHandler, CosmosDmvDbHandler>();
             builder.Services.AddTransient<IFaceHandler, FaceHandler>();
             builder.Services.AddTransient<IComputerVisionHandler, ComputerVisionHandler>();
+            builder.Services.AddTransient<IEventHandler, EventGridHandler>();
             
         }
     }

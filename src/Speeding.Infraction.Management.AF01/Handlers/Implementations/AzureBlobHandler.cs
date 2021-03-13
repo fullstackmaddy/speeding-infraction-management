@@ -9,7 +9,7 @@ using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
 
 namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
 {
-    public class BlobHandler : IBlobHandler
+    public class AzureBlobHandler : IBlobHandler
     {
         #region Properties
         private readonly BlobServiceClient _blobServiceClient;
@@ -17,7 +17,7 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
 
         #region Constructors
 
-        public BlobHandler(BlobServiceClient blobServiceClient)
+        public AzureBlobHandler(BlobServiceClient blobServiceClient)
         {
             _blobServiceClient = blobServiceClient
                 ?? throw new ArgumentNullException(nameof(blobServiceClient));

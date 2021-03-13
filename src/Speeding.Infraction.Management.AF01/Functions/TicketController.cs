@@ -3,6 +3,7 @@ using Microsoft.Azure.WebJobs.Extensions.EventGrid;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
+using Speeding.Infraction.Management.AF01.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,15 +15,11 @@ namespace Speeding.Infraction.Management.AF01.Functions
     public class TicketController
     {
         private readonly IDmvDbHandler _dmvDbHandler;
-        private readonly IBlobHandler _blobHandler;
-
+        
         public TicketController(IDmvDbHandler dmvDbHandler, IBlobHandler blobHandler)
         {
             _dmvDbHandler = dmvDbHandler ??
                 throw new ArgumentNullException(nameof(dmvDbHandler));
-
-            _blobHandler = blobHandler ??
-                throw new ArgumentNullException(nameof(blobHandler));
 
         }
 
@@ -32,22 +29,18 @@ namespace Speeding.Infraction.Management.AF01.Functions
                 ILogger logger
             )
         {
-            StorageBlobCreatedEventData blobCreatedEventData =
-               ((JObject)eventGridEvent.Data).ToObject<StorageBlobCreatedEventData>();
+            
+            CustomEventData customEventData =
+                ((JObject)eventGridEvent.Data).ToObject<CustomEventData>();
 
-            string blobName = GetBlobName(blobCreatedEventData.Url);
+            await _dmvDbHandler
+                .CreateSpeedingTicketAsync(
+                    ticketNumber: customEventData.TicketNumber,
+                    vehicleRegistrationNumber: customEventData.VehicleRegistrationNumber,
+                    district: customEventData.DistrictOfInfraction
+                )
+                .ConfigureAwait(false);
 
-            try
-            {
-                var blobMetatadata = await _blobHandler
-                    .GetBlobMetadataAsync(blobCreatedEventData.Url)
-                    .ConfigureAwait(false);
-
-               
-            }
-            catch (Exception ex)
-            { 
-            }
         }
 
 
