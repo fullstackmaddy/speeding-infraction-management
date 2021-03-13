@@ -5,6 +5,8 @@ using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents.Linq;
 using Speeding.Infraction.Management.AF01.Models;
 using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
+using Speeding.Infraction.Management.AF01.ConfigOptions;
+using Microsoft.Extensions.Options;
 
 namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
 {
@@ -12,14 +14,17 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
     {
         #region Properties
         private readonly IDocumentClient _documentClient;
-        
+        private readonly CosmosDbOptions _options;
         #endregion
 
         #region Constructors
-        public CosmosDmvDbHandler(IDocumentClient documentClient)
+        public CosmosDmvDbHandler(IDocumentClient documentClient, IOptions<CosmosDbOptions> settings)
         {
             _documentClient = documentClient ??
                 throw new ArgumentNullException(nameof(documentClient));
+
+            _options = settings.Value ??
+                throw new ArgumentNullException(nameof(settings));
             
         }
         #endregion
@@ -28,8 +33,8 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
         public async Task<VehicleOwner> GetOwnerInformationAsync(string vehicleRegistrationNumber, string district)
         {
             Uri documentUri = UriFactory.CreateDocumentUri(
-                    databaseId: Environment.GetEnvironmentVariable("dmvDbId"),
-                    collectionId: Environment.GetEnvironmentVariable("ownersCollection"),
+                    databaseId: _options.DatabseId,
+                    collectionId: _options.OwnersCollection,
                     documentId: vehicleRegistrationNumber
                 );
 
@@ -48,8 +53,8 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
             bool retVal = true;
 
             Uri collectionUri = UriFactory.CreateDocumentCollectionUri(
-                    databaseId: Environment.GetEnvironmentVariable("dmvDbId"),
-                    collectionId: Environment.GetEnvironmentVariable("speedingInfractionsCollection")
+                    databaseId: _options.DatabseId,
+                    collectionId: _options.InfractionsCollection
                 );
 
             var document = await _documentClient.CreateDocumentAsync(

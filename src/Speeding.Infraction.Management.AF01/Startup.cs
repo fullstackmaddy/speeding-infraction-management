@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using AutoMapper;
 using Azure.Storage.Blobs;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.Face;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Speeding.Infraction.Management.AF01.ConfigOptions;
 using Speeding.Infraction.Management.AF01.Handlers.Implementations;
 using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
 
@@ -16,8 +19,15 @@ namespace Speeding.Infraction.Management.AF01
 {
     public class Startup : FunctionsStartup
     {
+
         public override void Configure(IFunctionsHostBuilder builder)
         {
+            builder.Services.AddOptions<CosmosDbOptions>()
+                .Configure<IConfiguration>((settings, configuration) =>
+                {
+                    configuration.GetSection("CosmosDbOptions").Bind(settings);
+                });
+
             builder.Services.AddSingleton<IDocumentClient>(
                     x => new DocumentClient(
                             new Uri(
@@ -55,11 +65,12 @@ namespace Speeding.Infraction.Management.AF01
                             Environment.GetEnvironmentVariable("BlobStorageConnectionKey")
                         )
                 );
-
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             builder.Services.AddTransient<IBlobHandler, BlobHandler>();
             builder.Services.AddTransient<IDmvDbHandler, CosmosDmvDbHandler>();
             builder.Services.AddTransient<IFaceHandler, FaceHandler>();
             builder.Services.AddTransient<IComputerVisionHandler, ComputerVisionHandler>();
+            
         }
     }
 }
