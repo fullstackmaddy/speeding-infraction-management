@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.EventGrid.Models;
+using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.EventGrid;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -28,6 +29,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
 
         }
 
+        [FunctionName("ManageExeceptions")]
         public async Task ManageExceptions(
                 [EventGridTrigger] EventGridEvent eventGridEvent,
                 ILogger logger

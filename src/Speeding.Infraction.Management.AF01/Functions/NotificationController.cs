@@ -37,6 +37,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
                 throw new ArgumentNullException(nameof(eventHandler));
         }
 
+        [FunctionName("NotifyRegisteredOwners")]
         public async Task NotifyRegisteredOwners(
             [EventGridTrigger] EventGridEvent eventGridEvent,
             ILogger logger
