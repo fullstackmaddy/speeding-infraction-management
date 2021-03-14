@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.WebJobs.Extensions.SendGrid;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using CustomOption = Speeding.Infraction.Management.AF01.ConfigOptions;
 using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
 using Speeding.Infraction.Management.AF01.Models;

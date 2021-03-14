@@ -45,29 +45,40 @@ namespace Speeding.Infraction.Management.AF01.Functions
               ((JObject)eventGridEvent.Data).ToObject<StorageBlobCreatedEventData>();
 
             string blobName = GetBlobName(blobCreatedEventData.Url);
-
-            string registrationNumber = await _computerVisionHandler
-                .ExtractRegistrationNumberWithUrlAsync(blobCreatedEventData.Url)
-                .ConfigureAwait(false);
-
-            var metadata = await _blobHandler
-                .GetBlobMetadataAsync(blobCreatedEventData.Url);
-
-            CustomEventData customEventData = new CustomEventData()
+            
+            CustomEventData customEventData = new CustomEventData
             {
                 ImageUrl = blobCreatedEventData.Url,
                 TicketNumber = blobName,
-                DistrictOfInfraction = metadata["districtofinfraction"]
-                
             };
 
-            if (!string.IsNullOrWhiteSpace(registrationNumber))
+            try
             {
-                customEventData.VehicleRegistrationNumber = registrationNumber;
-                customEventData.CustomEvent = CustomEvent.NumberExtractionCompleted;
+                string registrationNumber = await _computerVisionHandler
+                        .ExtractRegistrationNumberWithUrlAsync(blobCreatedEventData.Url)
+                        .ConfigureAwait(false);
+
+                var metadata = await _blobHandler
+                    .GetBlobMetadataAsync(blobCreatedEventData.Url);
+
+
+                customEventData.DistrictOfInfraction = metadata["districtofinfraction"];
+                customEventData.DateOfInfraction = eventGridEvent.EventTime.ToString("dd-MM-yyyy");
+
+                if (!string.IsNullOrWhiteSpace(registrationNumber))
+                {
+                    customEventData.VehicleRegistrationNumber = registrationNumber;
+                    customEventData.CustomEvent = CustomEvent.NumberExtractionCompleted;
+
+                }
+                else
+                {
+                    customEventData.CustomEvent = CustomEvent.Exceptioned;
+                }
             }
-            else
+            catch (Exception)
             {
+
                 customEventData.CustomEvent = CustomEvent.Exceptioned;
             }
 

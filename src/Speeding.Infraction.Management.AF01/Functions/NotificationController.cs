@@ -17,10 +17,12 @@ namespace Speeding.Infraction.Management.AF01.Functions
         private readonly IDmvDbHandler _dmvDbHandler;
         private readonly IBlobHandler _blobHandler;
         private readonly IOwnerNotificationHandler _ownerNotificationHandler;
+        private readonly IEventHandler _eventHandler;
 
         public NotificationController(IDmvDbHandler dmvDbHandler,
             IBlobHandler blobHandler,
-            IOwnerNotificationHandler ownerNotificationHandler)
+            IOwnerNotificationHandler ownerNotificationHandler,
+            IEventHandler eventHandler)
         {
             _dmvDbHandler = dmvDbHandler ??
                 throw new ArgumentNullException(nameof(dmvDbHandler));
@@ -30,6 +32,9 @@ namespace Speeding.Infraction.Management.AF01.Functions
 
             _ownerNotificationHandler = ownerNotificationHandler ??
                 throw new ArgumentNullException(nameof(ownerNotificationHandler));
+
+            _eventHandler = eventHandler ??
+                throw new ArgumentNullException(nameof(eventHandler));
         }
 
         public async Task NotifyRegisteredOwners(
@@ -40,17 +45,20 @@ namespace Speeding.Infraction.Management.AF01.Functions
             CustomEventData inputEventData =
                        ((JObject)eventGridEvent.Data).ToObject<CustomEventData>();
 
-            var registeredOwnerInfo = await _dmvDbHandler
-                .GetOwnerInformationAsync(
-                vehicleRegistrationNumber: inputEventData.VehicleRegistrationNumber)
-                .ConfigureAwait(false);
 
-            var infractionImage = await _blobHandler
-                .DownloadBlobAsync(inputEventData.ImageUrl)
-                .ConfigureAwait(false);
+            try
+            {
+                var registeredOwnerInfo = await _dmvDbHandler
+                        .GetOwnerInformationAsync(
+                        vehicleRegistrationNumber: inputEventData.VehicleRegistrationNumber)
+                        .ConfigureAwait(false);
+
+                var infractionImage = await _blobHandler
+                    .DownloadBlobAsync(inputEventData.ImageUrl)
+                    .ConfigureAwait(false);
 
 
-            var attachments = new List<OwnerNotificationMessageAttachment>
+                var attachments = new List<OwnerNotificationMessageAttachment>
             {
                 new OwnerNotificationMessageAttachment
                 {
@@ -60,19 +68,33 @@ namespace Speeding.Infraction.Management.AF01.Functions
                 }
             };
 
-            var notificationMessage =
-                CreateNotificationMessage
-                (
-                    vehicleOwnerInfo: registeredOwnerInfo,
-                    attachments: attachments,
-                    ticketNumber: inputEventData.TicketNumber,
-                    infractionDate: inputEventData.DateOfInfraction,
-                    infractionDistrict: inputEventData.DistrictOfInfraction
-                 );
+                var notificationMessage =
+                    CreateNotificationMessage
+                    (
+                        vehicleOwnerInfo: registeredOwnerInfo,
+                        attachments: attachments,
+                        ticketNumber: inputEventData.TicketNumber,
+                        infractionDate: inputEventData.DateOfInfraction,
+                        infractionDistrict: inputEventData.DistrictOfInfraction
+                     );
 
-            await _ownerNotificationHandler
-                .NotifyOwnerAsync(notificationMessage)
+                await _ownerNotificationHandler
+                    .NotifyOwnerAsync(notificationMessage)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+
+                CustomEventData customEventData = new CustomEventData
+                {
+                    ImageUrl = inputEventData.ImageUrl,
+                    TicketNumber = inputEventData.TicketNumber,
+                    CustomEvent = CustomEvent.Exceptioned
+                };
+
+                await _eventHandler.PublishEventToTopicAsync(customEventData)
                 .ConfigureAwait(false);
+            }
             
         }
 

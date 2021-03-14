@@ -54,7 +54,8 @@ namespace Speeding.Infraction.Management.AF01.Functions
             {
                 ImageUrl = inputEventData.ImageUrl,
                 TicketNumber = inputEventData.TicketNumber,
-                DistrictOfInfraction = inputEventData.DistrictOfInfraction
+                DistrictOfInfraction = inputEventData.DistrictOfInfraction,
+                DateOfInfraction = inputEventData.DateOfInfraction
             };
 
             try

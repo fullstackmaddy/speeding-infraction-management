@@ -15,12 +15,17 @@ namespace Speeding.Infraction.Management.AF01.Functions
     public class TicketController
     {
         private readonly IDmvDbHandler _dmvDbHandler;
-        
-        public TicketController(IDmvDbHandler dmvDbHandler, IBlobHandler blobHandler)
+        private readonly IEventHandler _eventHandler;
+
+        public TicketController(IDmvDbHandler dmvDbHandler, 
+            IBlobHandler blobHandler,
+            IEventHandler eventHandler)
         {
             _dmvDbHandler = dmvDbHandler ??
                 throw new ArgumentNullException(nameof(dmvDbHandler));
 
+            _eventHandler = eventHandler ??
+                throw new ArgumentNullException(nameof(eventHandler));
         }
 
 
@@ -29,17 +34,35 @@ namespace Speeding.Infraction.Management.AF01.Functions
                 ILogger logger
             )
         {
-            
-            CustomEventData customEventData =
-                ((JObject)eventGridEvent.Data).ToObject<CustomEventData>();
+            CustomEventData inputEventData =
+                        ((JObject)eventGridEvent.Data).ToObject<CustomEventData>();
 
-            await _dmvDbHandler
-                .CreateSpeedingTicketAsync(
-                    ticketNumber: customEventData.TicketNumber,
-                    vehicleRegistrationNumber: customEventData.VehicleRegistrationNumber,
-                    district: customEventData.DistrictOfInfraction
-                )
+
+            try
+            {
+                
+
+                await _dmvDbHandler
+                    .CreateSpeedingTicketAsync(
+                        ticketNumber: inputEventData.TicketNumber,
+                        vehicleRegistrationNumber: inputEventData.VehicleRegistrationNumber,
+                        district: inputEventData.DistrictOfInfraction
+                    )
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+
+                CustomEventData customEventData = new CustomEventData
+                {
+                    ImageUrl = inputEventData.ImageUrl,
+                    TicketNumber = inputEventData.TicketNumber,
+                    CustomEvent = CustomEvent.Exceptioned
+                };
+
+                await _eventHandler.PublishEventToTopicAsync(customEventData)
                 .ConfigureAwait(false);
+            }
 
         }
 
