@@ -79,16 +79,16 @@ namespace Speeding.Infraction.Management.AF01.Functions
                             containerName: _options.BlurredImageContainerName,
                             stream: ms,
                             contentType: _options.UploadContentType,
-                            blobName: inputEventData.TicketNumber
+                            blobName: GetBlobNameWithExtension(inputEventData.TicketNumber)
                         )
                         .ConfigureAwait(false);
                 }
 
-                outputEventData.CustomEvent = CustomEvent.FaceDetectionAndBlurringCompleted;
+                outputEventData.CustomEvent = CustomEvent.FaceDetectionAndBlurringCompleted.ToString();
             }
             catch (Exception)
             {
-                outputEventData.CustomEvent = CustomEvent.Exceptioned;
+                outputEventData.CustomEvent = CustomEvent.Exceptioned.ToString();
                 
             }
 
@@ -98,5 +98,14 @@ namespace Speeding.Infraction.Management.AF01.Functions
             
             
         }
+
+        public string GetBlobNameWithExtension(string blobName)
+        {
+
+            return $"{blobName}.jpeg";
+
+        }
+
+
     }
 }

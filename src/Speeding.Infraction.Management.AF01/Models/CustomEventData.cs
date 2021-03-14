@@ -15,7 +15,7 @@ namespace Speeding.Infraction.Management.AF01.Models
         public string ImageUrl { get; set; }
 
         [JsonProperty(PropertyName = "customEvent")]
-        public CustomEvent CustomEvent { get; set; }
+        public string CustomEvent { get; set; }
 
         [JsonProperty(PropertyName = "vehicleRegistrationNumber")]
         public string VehicleRegistrationNumber { get; set; }

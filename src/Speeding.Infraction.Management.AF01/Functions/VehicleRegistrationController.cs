@@ -68,18 +68,18 @@ namespace Speeding.Infraction.Management.AF01.Functions
                 if (!string.IsNullOrWhiteSpace(registrationNumber))
                 {
                     customEventData.VehicleRegistrationNumber = registrationNumber;
-                    customEventData.CustomEvent = CustomEvent.NumberExtractionCompleted;
+                    customEventData.CustomEvent = CustomEvent.NumberExtractionCompleted.ToString();
 
                 }
                 else
                 {
-                    customEventData.CustomEvent = CustomEvent.Exceptioned;
+                    customEventData.CustomEvent = CustomEvent.Exceptioned.ToString();
                 }
             }
             catch (Exception)
             {
 
-                customEventData.CustomEvent = CustomEvent.Exceptioned;
+                customEventData.CustomEvent = CustomEvent.Exceptioned.ToString();
             }
 
             await _eventHandler

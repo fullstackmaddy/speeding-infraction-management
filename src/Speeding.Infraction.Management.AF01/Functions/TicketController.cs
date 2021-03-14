@@ -58,7 +58,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
                 {
                     ImageUrl = inputEventData.ImageUrl,
                     TicketNumber = inputEventData.TicketNumber,
-                    CustomEvent = CustomEvent.Exceptioned
+                    CustomEvent = CustomEvent.Exceptioned.ToString()
                 };
 
                 await _eventHandler.PublishEventToTopicAsync(customEventData)

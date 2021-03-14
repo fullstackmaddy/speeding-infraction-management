@@ -36,6 +36,12 @@ namespace Speeding.Infraction.Management.AF01
                     configuration.GetSection("EventGridOptions").Bind(settings);
                 });
 
+            builder.Services.AddOptions<BlobOptions>()
+                .Configure<IConfiguration>((settings, configuration) =>
+                {
+                    configuration.GetSection(nameof(BlobOptions)).Bind(settings);
+                });
+
             builder.Services.AddSingleton<IDocumentClient>(
                     x => new DocumentClient(
                             new Uri(
