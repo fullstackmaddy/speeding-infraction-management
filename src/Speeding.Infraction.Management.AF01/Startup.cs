@@ -76,7 +76,7 @@ namespace Speeding.Infraction.Management.AF01
             builder.Services.AddSingleton<IEventGridClient>(
                     new EventGridClient(
                             new TopicCredentials(
-                                Environment.GetEnvironmentVariable("CustomEventGridTopicKey")
+                                Environment.GetEnvironmentVariable("EventGridTopicSasKey")
                             )
                         )
                 );

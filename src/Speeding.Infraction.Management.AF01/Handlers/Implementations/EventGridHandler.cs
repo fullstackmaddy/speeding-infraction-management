@@ -37,7 +37,6 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
                 )
                 .ConfigureAwait(false);
 
-            throw new NotImplementedException();
         }
 
         private EventGridEvent CreateEventInstance(CustomEventData customEventData)
