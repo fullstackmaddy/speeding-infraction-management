@@ -63,7 +63,7 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
 
         }
 
-        public async Task CreateSpeedingTicketAsync(string ticketNumber, string vehicleRegistrationNumber, string district)
+        public async Task CreateSpeedingTicketAsync(string ticketNumber, string vehicleRegistrationNumber, string district, string date)
         {
             
 
@@ -74,9 +74,12 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
 
             var document = await _documentClient.CreateDocumentAsync(
                     documentCollectionUri : collectionUri,
-                    new {id = ticketNumber,
+                    new {id = Guid.NewGuid().ToString(),
+                        ticketNumber = ticketNumber,
                         vehicleRegistrationNumber = vehicleRegistrationNumber,
-                        district = district},
+                        district = district,
+                        date = date
+                        },
 
                     new RequestOptions
                     {
@@ -84,6 +87,38 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
                     }
                 );
 
+        }
+
+        public async Task<SpeedingTicket> GetSpeedingTicketInfoAsync(string ticketNumber)
+        {
+            Uri collectionUri = UriFactory.CreateDocumentCollectionUri(
+                    databaseId: _options.DatabseId,
+                    collectionId: _options.InfractionsCollection
+                );
+
+            SqlQuerySpec sqlQuerySpec = new SqlQuerySpec
+            {
+                QueryText = "Select * FROM SpeedingInfractions o Where o.ticketNumber = @ticketNumber OFFSET 0 LIMIT 1",
+                Parameters = new SqlParameterCollection()
+                {
+                    new SqlParameter("@ticketNumber", ticketNumber)
+                }
+            };
+
+            FeedOptions feedOptions = new FeedOptions
+            {
+                EnableCrossPartitionQuery = true
+            };
+
+            var query = await Task.Factory.StartNew(
+                    () => _documentClient.CreateDocumentQuery<SpeedingTicket>(
+                        collectionUri,
+                        feedOptions
+                ))
+                .ConfigureAwait(false);
+
+            
+            return query.ToList()[0];
         }
         #endregion
     }

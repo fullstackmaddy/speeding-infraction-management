@@ -31,7 +31,7 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
                 .SendEmailAsync(message)
                 .ConfigureAwait(false);
 
-            throw new NotImplementedException();
+            
         }
 
         private SendGridMessage CreateEmailMessage(OwnerNotificationMessage ownerNotificationMessage)

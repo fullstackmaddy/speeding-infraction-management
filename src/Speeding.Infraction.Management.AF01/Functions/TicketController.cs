@@ -47,7 +47,8 @@ namespace Speeding.Infraction.Management.AF01.Functions
                     .CreateSpeedingTicketAsync(
                         ticketNumber: inputEventData.TicketNumber,
                         vehicleRegistrationNumber: inputEventData.VehicleRegistrationNumber,
-                        district: inputEventData.DistrictOfInfraction
+                        district: inputEventData.DistrictOfInfraction,
+                        date: inputEventData.DateOfInfraction
                     )
                     .ConfigureAwait(false);
             }

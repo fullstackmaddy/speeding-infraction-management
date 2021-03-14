@@ -12,6 +12,7 @@ using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SendGrid;
 using Speeding.Infraction.Management.AF01.ConfigOptions;
 using Speeding.Infraction.Management.AF01.Handlers.Implementations;
 using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
@@ -40,6 +41,12 @@ namespace Speeding.Infraction.Management.AF01
                 .Configure<IConfiguration>((settings, configuration) =>
                 {
                     configuration.GetSection(nameof(BlobOptions)).Bind(settings);
+                });
+
+            builder.Services.AddOptions<SendGridOptions>()
+                .Configure<IConfiguration>((settings, configuration) =>
+                {
+                    configuration.GetSection(nameof(SendGridOptions)).Bind(settings);
                 });
 
             builder.Services.AddSingleton<IDocumentClient>(
@@ -87,12 +94,19 @@ namespace Speeding.Infraction.Management.AF01
                         )
                 );
 
+            builder.Services.AddSingleton<ISendGridClient>(
+                    new SendGridClient(
+                            Environment.GetEnvironmentVariable("SendGridApiKey")
+                        )
+                );
+
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             builder.Services.AddTransient<IBlobHandler, AzureBlobHandler>();
             builder.Services.AddTransient<IDmvDbHandler, CosmosDmvDbHandler>();
             builder.Services.AddTransient<IFaceHandler, FaceHandler>();
             builder.Services.AddTransient<IComputerVisionHandler, ComputerVisionHandler>();
             builder.Services.AddTransient<IEventHandler, EventGridHandler>();
+            builder.Services.AddTransient<IOwnerNotificationHandler, SendGridOwnerNotificationHandler>();
             
         }
     }

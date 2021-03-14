@@ -7,6 +7,7 @@ using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
 using Speeding.Infraction.Management.AF01.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,25 +38,31 @@ namespace Speeding.Infraction.Management.AF01.Functions
                 throw new ArgumentNullException(nameof(eventHandler));
         }
 
-        [FunctionName("NotifyRegisteredOwners")]
-        public async Task NotifyRegisteredOwners(
+        [FunctionName("NotifyRegisteredOwner")]
+        public async Task NotifyRegisteredOwner(
             [EventGridTrigger] EventGridEvent eventGridEvent,
             ILogger logger
             )
         {
-            CustomEventData inputEventData =
-                       ((JObject)eventGridEvent.Data).ToObject<CustomEventData>();
+            StorageBlobCreatedEventData blobCreatedEventData =
+              ((JObject)eventGridEvent.Data).ToObject<StorageBlobCreatedEventData>();
+
+            string blobName = GetBlobName(blobCreatedEventData.Url);
 
 
             try
             {
+                var speedingTicket = await _dmvDbHandler
+                    .GetSpeedingTicketInfoAsync(blobName)
+                    .ConfigureAwait(false);
+
                 var registeredOwnerInfo = await _dmvDbHandler
                         .GetOwnerInformationAsync(
-                        vehicleRegistrationNumber: inputEventData.VehicleRegistrationNumber)
+                        vehicleRegistrationNumber: speedingTicket.VehicleResgistrationNumber)
                         .ConfigureAwait(false);
 
                 var infractionImage = await _blobHandler
-                    .DownloadBlobAsync(inputEventData.ImageUrl)
+                    .DownloadBlobAsync(blobCreatedEventData.Url)
                     .ConfigureAwait(false);
 
 
@@ -63,7 +70,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
             {
                 new OwnerNotificationMessageAttachment
                 {
-                    Name = inputEventData.TicketNumber,
+                    Name = speedingTicket.TicketNumber,
                     Content = Convert.ToBase64String(infractionImage),
                     ContentType = "image/jpeg"
                 }
@@ -74,22 +81,22 @@ namespace Speeding.Infraction.Management.AF01.Functions
                     (
                         vehicleOwnerInfo: registeredOwnerInfo,
                         attachments: attachments,
-                        ticketNumber: inputEventData.TicketNumber,
-                        infractionDate: inputEventData.DateOfInfraction,
-                        infractionDistrict: inputEventData.DistrictOfInfraction
+                        ticketNumber: speedingTicket.TicketNumber,
+                        infractionDate: speedingTicket.Date ,
+                        infractionDistrict: speedingTicket.District
                      );
 
                 await _ownerNotificationHandler
                     .NotifyOwnerAsync(notificationMessage)
                     .ConfigureAwait(false);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
                 CustomEventData customEventData = new CustomEventData
                 {
-                    ImageUrl = inputEventData.ImageUrl,
-                    TicketNumber = inputEventData.TicketNumber,
+                    ImageUrl = blobCreatedEventData.Url,
+                    
                     CustomEvent = CustomEvent.Exceptioned.ToString()
                 };
 
@@ -110,7 +117,22 @@ namespace Speeding.Infraction.Management.AF01.Functions
             )
         {
 
-            throw new NotImplementedException();
+            return new OwnerNotificationMessage
+            {
+                Attachments = attachments,
+                InfractionDate = infractionDate,
+                InfractionDistrict = infractionDistrict,
+                TicketNumber = ticketNumber,
+                VehicleOwnerInfo = vehicleOwnerInfo
+            };
+        }
+
+
+        public string GetBlobName(string blobUrl)
+        {
+
+            return Path.GetFileNameWithoutExtension(blobUrl);
+
         }
     }
 }

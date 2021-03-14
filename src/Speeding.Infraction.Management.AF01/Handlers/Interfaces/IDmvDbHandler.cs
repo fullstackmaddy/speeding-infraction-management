@@ -17,8 +17,16 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Interfaces
         /// <param name="ticketNumber">Ticket number</param>
         /// <param name="vehicleRegistrationNumber">Vehicle registration number</param>
         /// <param name="district">The district where the infraction occured</param>
+        /// <param name="date">Date of infraction</param>
         /// <returns></returns>
-        public Task CreateSpeedingTicketAsync(string ticketNumber, string vehicleRegistrationNumber, string district);
+        public Task CreateSpeedingTicketAsync(string ticketNumber, string vehicleRegistrationNumber, string district, string date);
+
+        /// <summary>
+        /// Get the ticket details
+        /// </summary>
+        /// <param name="ticketNumber">Tikcet number</param>
+        /// <returns>Speeding Ticket details</returns>
+        public Task<SpeedingTicket> GetSpeedingTicketInfoAsync(string ticketNumber);
 
 
     }
