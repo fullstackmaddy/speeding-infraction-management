@@ -26,9 +26,9 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Interfaces
         /// <summary>
         /// Blur faces defined by the detected faces list
         /// </summary>
-        /// <param name="imageStream">The stream containing the image</param>
+        /// <param name="imageBytes">The byte array containing the image</param>
         /// <param name="detectedFaces">List of the detected faces in the image</param>
         /// <returns>Processed stream containing image with blurred faces</returns>
-        public Task<Stream> BlurFacesAsync(Stream imageStream, List<DetectedFace> detectedFaces);
+        public Task<byte[]> BlurFacesAsync(byte[] imageBytes, List<DetectedFace> detectedFaces);
     }
 }

@@ -22,5 +22,9 @@ namespace Speeding.Infraction.Management.AF01.Models
 
         [JsonProperty(PropertyName = "districtOfInfraction")]
         public string DistrictOfInfraction { get; set; }
+
+        public string DateOfInfraction { get; set; }
+
+        
     }
 }

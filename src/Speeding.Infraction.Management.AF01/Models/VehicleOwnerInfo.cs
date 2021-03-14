@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Speeding.Infraction.Management.AF01.Models
 {
-    public class VehicleOwner
+    public class VehicleOwnerInfo
     {
         [JsonProperty(PropertyName = "firstName")]
         public string FirstName { get; set; }
@@ -21,5 +21,11 @@ namespace Speeding.Infraction.Management.AF01.Models
 
         [JsonProperty(PropertyName = "vehicleRegistrationNumber")]
         public string VehicleRegistrationNumber { get; set; }
+
+        public string GetFullName()
+        {
+            return $"{this.Salutation}.{this.LastName},{this.FirstName}";
+            
+        }
     }
 }

@@ -7,6 +7,7 @@ using Speeding.Infraction.Management.AF01.Models;
 using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
 using Speeding.Infraction.Management.AF01.ConfigOptions;
 using Microsoft.Extensions.Options;
+using System.Linq;
 
 namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
 {
@@ -30,21 +31,35 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
         #endregion
 
         #region PublicMethods
-        public async Task<VehicleOwner> GetOwnerInformationAsync(string vehicleRegistrationNumber, string district)
+        public async Task<VehicleOwnerInfo> GetOwnerInformationAsync(string vehicleRegistrationNumber)
         {
-            Uri documentUri = UriFactory.CreateDocumentUri(
+            Uri collectionUri = UriFactory.CreateDocumentCollectionUri(
                     databaseId: _options.DatabseId,
-                    collectionId: _options.OwnersCollection,
-                    documentId: vehicleRegistrationNumber
+                    collectionId: _options.OwnersCollection
                 );
 
-            var vehicleOwner = await _documentClient.ReadDocumentAsync<VehicleOwner>(
-                    documentUri: documentUri,
-                    new RequestOptions {PartitionKey = new PartitionKey(district) }
-                )
+            SqlQuerySpec sqlQuerySpec = new SqlQuerySpec
+            {
+                QueryText = "Select * FROM RegisteredOwners o Where o.vehicleRegistrationNumber = @vehicleRegistrationNumber OFFSET 0 LIMIT 1",
+                Parameters = new SqlParameterCollection()
+                {
+                    new SqlParameter("@vehicleRegistrationNumber", vehicleRegistrationNumber)
+                }
+            };
+
+            FeedOptions feedOptions = new FeedOptions
+            {
+                EnableCrossPartitionQuery = true
+            };
+
+            var query = await Task.Factory.StartNew(
+                    () => _documentClient.CreateDocumentQuery<VehicleOwnerInfo>(
+                        collectionUri,
+                        feedOptions
+                ))
                 .ConfigureAwait(false);
-            
-            return vehicleOwner;
+
+            return query.ToList()[0];
 
         }
 

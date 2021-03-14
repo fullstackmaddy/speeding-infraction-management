@@ -32,17 +32,28 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
                 throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<Stream> BlurFacesAsync(Stream imageStream, List<LocalFaceModel.DetectedFace> detectedFaces)
+
+
+        public async Task<byte[]> BlurFacesAsync(byte[] imageBytes, List<LocalFaceModel.DetectedFace> detectedFaces)
         {
-            Image<Color, uint> image = await Task
-                .Factory.StartNew(() => BlurFaces(imageStream, detectedFaces))
-                .ConfigureAwait(false);
+            Image<Color, uint> image = new Image<Color, uint>();
 
-            Stream processedImage = new MemoryStream();
-            image.Save(processedImage);
+            using (MemoryStream imageStream = new MemoryStream(imageBytes))
+            {
+                 image = await Task
+                   .Factory.StartNew(() => BlurFaces(imageStream, detectedFaces))
+                   .ConfigureAwait(false);
+            }
 
-            return processedImage;
+            using (MemoryStream outputStream = new MemoryStream())
+            {
+                image.Save(outputStream);
 
+                return outputStream.ToArray();
+            }
+
+
+                
         }
 
         private static Image<Color, uint> BlurFaces(Stream imageStream, List<DetectedFace> detectedFaces)
@@ -98,5 +109,7 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
                     detectedFaces.ToList()
                 );
         }
+
+       
     }
 }

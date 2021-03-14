@@ -32,7 +32,7 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Interfaces
         /// </summary>
         /// <param name="blobUrl">Url of the blob</param>
         /// <returns>Blob information</returns>
-        public Task<BlobInfo> DownloadBlobAsync(string blobUrl);
+        public Task<byte[]> DownloadBlobAsync(string blobUrl);
 
     }
 }

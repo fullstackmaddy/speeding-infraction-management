@@ -7,6 +7,7 @@ namespace Speeding.Infraction.Management.AF01.Models
     public enum CustomEvent
     {
         NumberExtractionCompleted,
+        FaceDetectionAndBlurringCompleted,
         Exceptioned
     }
 }

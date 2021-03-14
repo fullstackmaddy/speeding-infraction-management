@@ -24,7 +24,7 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
 
         }
 
-        public async Task<Models.BlobInfo> DownloadBlobAsync(string blobUrl)
+        public async Task<byte[]> DownloadBlobAsync(string blobUrl)
         {
             var blobUriBuilder = new BlobUriBuilder(
                 new Uri(blobUrl));
@@ -36,12 +36,13 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
 
             BlobDownloadInfo blobDownloadInfo = await blobClient.DownloadAsync();
 
-            return new Models.BlobInfo
+            using (MemoryStream ms = new MemoryStream())
             {
-                Metadata = blobDownloadInfo.Details.Metadata,
-                ContentType = blobDownloadInfo.ContentType,
-                Content = blobDownloadInfo.Content
-            };
+                await blobDownloadInfo.Content.CopyToAsync(ms)
+                    .ConfigureAwait(false);
+
+                return ms.ToArray();
+            }
 
         }
 
