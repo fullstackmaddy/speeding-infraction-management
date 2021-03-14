@@ -63,9 +63,9 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
 
         }
 
-        public async Task<bool> CreateSpeedingTicketAsync(string ticketNumber, string vehicleRegistrationNumber, string district)
+        public async Task CreateSpeedingTicketAsync(string ticketNumber, string vehicleRegistrationNumber, string district)
         {
-            bool retVal = true;
+            
 
             Uri collectionUri = UriFactory.CreateDocumentCollectionUri(
                     databaseId: _options.DatabseId,
@@ -83,11 +83,6 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
                         PartitionKey = new PartitionKey(district)
                     }
                 );
-
-            if(document == null)
-                retVal = false;
-            
-            return retVal;
 
         }
         #endregion

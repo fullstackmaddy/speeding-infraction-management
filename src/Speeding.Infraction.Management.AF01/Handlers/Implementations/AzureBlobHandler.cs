@@ -68,10 +68,9 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
             return blobProperties.Metadata;
         }
 
-        public async Task<bool> UploadStreamAsBlobAsync(string containerName, Stream stream, string contentType, string blobName)
+        public async Task UploadStreamAsBlobAsync(string containerName, Stream stream, string contentType, string blobName)
         {
-            var retval = true;
-
+           
             var blobContainerClient = _blobServiceClient
                 .GetBlobContainerClient(containerName);
 
@@ -85,11 +84,7 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
                 .UploadAsync(stream, blobHttpHeaders)
                 .ConfigureAwait(false);
 
-            if (blobContentInfo == null)
-                retval = false;
-
-            return retval;
-
+            
         }
     }
 }

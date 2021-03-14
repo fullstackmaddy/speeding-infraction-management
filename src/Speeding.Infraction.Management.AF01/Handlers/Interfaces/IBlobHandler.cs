@@ -23,8 +23,8 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Interfaces
         /// <param name="stream">Actual Stream representing object to be uploaded</param>
         /// <param name="contentType">Content type of the object</param>
         /// <param name="blobName">Name with which the blob is to be created</param>
-        /// <returns>Flag indicating if the upload was successful or not</returns>
-        public Task<bool> UploadStreamAsBlobAsync(string containerName, Stream stream, string contentType,
+        /// <returns></returns>
+        public Task UploadStreamAsBlobAsync(string containerName, Stream stream, string contentType,
             string blobName);
 
         /// <summary>
