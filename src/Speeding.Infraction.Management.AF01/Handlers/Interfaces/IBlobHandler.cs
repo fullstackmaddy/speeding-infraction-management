@@ -34,5 +34,14 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Interfaces
         /// <returns>Blob information</returns>
         public Task<byte[]> DownloadBlobAsync(string blobUrl);
 
+        /// <summary>
+        /// Copy the blob from one container to another in same storage account using the url of the source blob
+        /// </summary>
+        /// <param name="sourceBlobUrl">Url of the source blob</param>
+        /// <param name="targetContainerName">Destination container name</param>
+        /// <returns></returns>
+        public Task CopyBlobAcrossContainerWithUrlsAsync(string sourceBlobUrl, string targetContainerName);
+
+
     }
 }

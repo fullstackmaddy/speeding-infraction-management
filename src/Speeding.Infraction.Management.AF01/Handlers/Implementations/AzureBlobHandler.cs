@@ -24,6 +24,22 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
 
         }
 
+        public async Task CopyBlobAcrossContainerWithUrlsAsync(string sourceBlobUrl, string targetContainerName)
+        {
+            var blobUriBuilder = new BlobUriBuilder(
+                new Uri(sourceBlobUrl)
+                );
+
+            var sourceContainerClient = _blobServiceClient.GetBlobContainerClient(targetContainerName);
+
+            var blobClient = sourceContainerClient.GetBlobClient(blobUriBuilder.BlobName);
+
+            await blobClient.SyncCopyFromUriAsync(
+                    new Uri(sourceBlobUrl)
+                );
+
+        }
+
         public async Task<byte[]> DownloadBlobAsync(string blobUrl)
         {
             var blobUriBuilder = new BlobUriBuilder(
