@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using Speeding.Infraction.Management.AF01.ConfigOptions;
+using Speeding.Infraction.Management.AF01.Constants;
 using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
 using Speeding.Infraction.Management.AF01.Helpers;
 using Speeding.Infraction.Management.AF01.Models;
@@ -51,6 +52,22 @@ namespace Speeding.Infraction.Management.AF01.Functions
             CustomEventData inputEventData =
                        ((JObject)eventGridEvent.Data).ToObject<CustomEventData>();
 
+            var correlationId = LoggingHelper.GetCorrelationId(inputEventData);
+
+            #region Logging
+
+            logger.LogInformation(
+                new EventId((int)LoggingConstants.EventId.DetectAndBlurFacesStarted),
+                LoggingConstants.Template,
+                LoggingConstants.EventId.DetectAndBlurFacesStarted.ToString(),
+                correlationId,
+                LoggingConstants.ProcessingFunction.DetectAndBlurFaces.ToString(),
+                LoggingConstants.ProcessStatus.Started,
+                "Execution Started"
+                );
+           
+            #endregion
+
             CustomEventData outputEventData = new CustomEventData
             {
                 ImageUrl = inputEventData.ImageUrl,
@@ -86,11 +103,40 @@ namespace Speeding.Infraction.Management.AF01.Functions
                 }
 
                 outputEventData.CustomEvent = CustomEvent.FaceDetectionAndBlurringCompleted.ToString();
+
+                #region Logging
+
+                logger.LogInformation(
+                    new EventId((int)LoggingConstants.EventId.DetectAndBlurFacesFinished),
+                    LoggingConstants.Template,
+                    LoggingConstants.EventId.DetectAndBlurFacesFinished.ToString(),
+                    correlationId,
+                    LoggingConstants.ProcessingFunction.DetectAndBlurFaces.ToString(),
+                    LoggingConstants.ProcessStatus.Finished,
+                    "Execution Finished"
+                    );
+
+                #endregion
+
+
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 outputEventData.CustomEvent = CustomEvent.Exceptioned.ToString();
-                
+
+                #region Logging
+
+                logger.LogInformation(
+                    new EventId((int)LoggingConstants.EventId.DetectAndBlurFacesFinished),
+                    LoggingConstants.Template,
+                    LoggingConstants.EventId.DetectAndBlurFacesFinished.ToString(),
+                    correlationId,
+                    LoggingConstants.ProcessingFunction.DetectAndBlurFaces.ToString(),
+                    LoggingConstants.ProcessStatus.Failed,
+                    $"Execution Failed. Reason: {ex.Message}"
+                    );
+
+                #endregion
             }
 
 

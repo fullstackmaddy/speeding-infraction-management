@@ -3,7 +3,9 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.EventGrid;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using Speeding.Infraction.Management.AF01.Constants;
 using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
+using Speeding.Infraction.Management.AF01.Helpers;
 using Speeding.Infraction.Management.AF01.Models;
 using System;
 using System.Collections.Generic;
@@ -38,6 +40,22 @@ namespace Speeding.Infraction.Management.AF01.Functions
             CustomEventData inputEventData =
                         ((JObject)eventGridEvent.Data).ToObject<CustomEventData>();
 
+            var correlationId = LoggingHelper.GetCorrelationId(inputEventData);
+
+            #region Logging
+
+            logger.LogInformation(
+                new EventId((int)LoggingConstants.EventId.CreateSpeedingTicketStarted),
+                LoggingConstants.Template,
+                LoggingConstants.EventId.CreateSpeedingTicketStarted.ToString(),
+                correlationId,
+                LoggingConstants.ProcessingFunction.CreateSpeedingTicket.ToString(),
+                LoggingConstants.ProcessStatus.Started.ToString(),
+                "Execution Started"
+                );
+
+            #endregion
+
 
             try
             {
@@ -51,6 +69,20 @@ namespace Speeding.Infraction.Management.AF01.Functions
                         date: inputEventData.DateOfInfraction
                     )
                     .ConfigureAwait(false);
+
+                #region Logging
+
+                logger.LogInformation(
+                    new EventId((int)LoggingConstants.EventId.CreateSpeedingTicketFinished),
+                    LoggingConstants.Template,
+                    LoggingConstants.EventId.CreateSpeedingTicketFinished.ToString(),
+                    correlationId,
+                    LoggingConstants.ProcessingFunction.CreateSpeedingTicket.ToString(),
+                    LoggingConstants.ProcessStatus.Finished.ToString(),
+                    "Execution Finished"
+                    );
+
+                #endregion
             }
             catch (Exception ex)
             {
@@ -64,6 +96,21 @@ namespace Speeding.Infraction.Management.AF01.Functions
 
                 await _eventHandler.PublishEventToTopicAsync(customEventData)
                 .ConfigureAwait(false);
+
+                #region Logging
+
+                logger.LogInformation(
+                    new EventId((int)LoggingConstants.EventId.CreateSpeedingTicketFinished),
+                    LoggingConstants.Template,
+                    LoggingConstants.EventId.CreateSpeedingTicketFinished.ToString(),
+                    correlationId,
+                    LoggingConstants.ProcessingFunction.CreateSpeedingTicket.ToString(),
+                    LoggingConstants.ProcessStatus.Failed.ToString(),
+                    $"Execution Failed. Reason: {ex.Message}"
+                    );
+
+                #endregion
+
             }
 
         }

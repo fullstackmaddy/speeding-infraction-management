@@ -31,8 +31,8 @@ namespace  Speeding.Infraction.Management.AF01.Constants
             NotifyVehicleOwnerStarted = 401,
             NotifyVehicleOwnerFinished = 402,
 
-            ManageExeceptionsStarted = 401,
-            ManageExeceptionsFinished = 402
+            ManageExeceptionsStarted = 501,
+            ManageExeceptionsFinished = 502
 
 
         }

@@ -46,7 +46,22 @@ namespace Speeding.Infraction.Management.AF01.Functions
               ((JObject)eventGridEvent.Data).ToObject<StorageBlobCreatedEventData>();
 
             string blobName = BlobHelper.GetBlobName(blobCreatedEventData.Url);
-            
+
+
+            #region Logging
+
+            logger.LogInformation(
+                new EventId((int)LoggingConstants.EventId.ExtractRegistrationNumberStarted),
+                LoggingConstants.Template,
+                LoggingConstants.EventId.ExtractRegistrationNumberStarted.ToString(),
+                blobName,
+                LoggingConstants.ProcessingFunction.ExtractRegistrationNumber.ToString(),
+                LoggingConstants.ProcessStatus.Started.ToString(),
+                "Execution Started"
+                );
+
+            #endregion
+
             CustomEventData customEventData = new CustomEventData
             {
                 ImageUrl = blobCreatedEventData.Url,
@@ -71,16 +86,58 @@ namespace Speeding.Infraction.Management.AF01.Functions
                     customEventData.VehicleRegistrationNumber = registrationNumber;
                     customEventData.CustomEvent = CustomEvent.NumberExtractionCompleted.ToString();
 
+                    #region Logging
+
+                    logger.LogInformation(
+                        new EventId((int)LoggingConstants.EventId.ExtractRegistrationNumberFinished),
+                        LoggingConstants.Template,
+                        LoggingConstants.EventId.ExtractRegistrationNumberFinished.ToString(),
+                        blobName,
+                        LoggingConstants.ProcessingFunction.ExtractRegistrationNumber.ToString(),
+                        LoggingConstants.ProcessStatus.Finished.ToString(),
+                        "Execution Finished"
+                        );
+
+                    #endregion
+
                 }
                 else
                 {
                     customEventData.CustomEvent = CustomEvent.Exceptioned.ToString();
+
+                    #region Logging
+
+                    logger.LogInformation(
+                        new EventId((int)LoggingConstants.EventId.ExtractRegistrationNumberFinished),
+                        LoggingConstants.Template,
+                        LoggingConstants.EventId.ExtractRegistrationNumberFinished.ToString(),
+                        blobName,
+                        LoggingConstants.ProcessingFunction.ExtractRegistrationNumber.ToString(),
+                        LoggingConstants.ProcessStatus.Failed.ToString(),
+                        "Execution Failed. Reason: Failed to extract number plate from the image"
+                        );
+
+                    #endregion
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
                 customEventData.CustomEvent = CustomEvent.Exceptioned.ToString();
+
+                #region Logging
+
+                logger.LogInformation(
+                    new EventId((int)LoggingConstants.EventId.ExtractRegistrationNumberFinished),
+                    LoggingConstants.Template,
+                    LoggingConstants.EventId.ExtractRegistrationNumberFinished.ToString(),
+                    blobName,
+                    LoggingConstants.ProcessingFunction.ExtractRegistrationNumber.ToString(),
+                    LoggingConstants.ProcessStatus.Failed.ToString(),
+                    $"Execution Failed. Reason: {ex.Message}"
+                    );
+
+                #endregion
             }
 
             await _eventHandler
