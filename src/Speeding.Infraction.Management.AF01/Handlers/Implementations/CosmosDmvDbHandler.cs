@@ -96,29 +96,19 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
                     collectionId: _options.InfractionsCollection
                 );
 
-            SqlQuerySpec sqlQuerySpec = new SqlQuerySpec
-            {
-                QueryText = "Select * FROM SpeedingInfractions o Where o.ticketNumber = @ticketNumber OFFSET 0 LIMIT 1",
-                Parameters = new SqlParameterCollection()
-                {
-                    new SqlParameter("@ticketNumber", ticketNumber)
-                }
-            };
-
-            FeedOptions feedOptions = new FeedOptions
-            {
-                EnableCrossPartitionQuery = true
-            };
-
-            var query = await Task.Factory.StartNew(
-                    () => _documentClient.CreateDocumentQuery<SpeedingTicket>(
-                        collectionUri,
-                        feedOptions
-                ))
+            var documentquery = await Task.Factory.StartNew(
+                () =>_documentClient.CreateDocumentQuery<SpeedingTicket>(
+                    collectionUri,
+                    new FeedOptions
+                    {
+                        MaxItemCount = 1,
+                        EnableCrossPartitionQuery = true
+                    }
+                )
+                .Where(x => x.TicketNumber == ticketNumber))
                 .ConfigureAwait(false);
-
             
-            return query.ToList()[0];
+            return documentquery.ToList()[0];
         }
         #endregion
     }
