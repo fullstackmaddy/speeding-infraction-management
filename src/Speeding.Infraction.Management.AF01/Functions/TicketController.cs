@@ -68,14 +68,5 @@ namespace Speeding.Infraction.Management.AF01.Functions
 
         }
 
-
-
-
-        public string GetBlobName(string blobUrl)
-        {
-
-            return Path.GetFileNameWithoutExtension(blobUrl);
-
-        }
     }
 }

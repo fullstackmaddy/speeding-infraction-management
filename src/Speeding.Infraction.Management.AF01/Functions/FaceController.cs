@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using Speeding.Infraction.Management.AF01.ConfigOptions;
 using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
+using Speeding.Infraction.Management.AF01.Helpers;
 using Speeding.Infraction.Management.AF01.Models;
 using System;
 using System.Collections.Generic;
@@ -79,7 +80,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
                             containerName: _options.BlurredImageContainerName,
                             stream: ms,
                             contentType: _options.UploadContentType,
-                            blobName: GetBlobNameWithExtension(inputEventData.TicketNumber)
+                            blobName: BlobHelper.GetBlobNameWithExtension(inputEventData.TicketNumber)
                         )
                         .ConfigureAwait(false);
                 }
@@ -99,12 +100,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
             
         }
 
-        public string GetBlobNameWithExtension(string blobName)
-        {
-
-            return $"{blobName}.jpeg";
-
-        }
+       
 
 
     }

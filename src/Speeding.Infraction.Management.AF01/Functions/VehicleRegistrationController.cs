@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Speeding.Infraction.Management.AF01.Constants;
 using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
+using Speeding.Infraction.Management.AF01.Helpers;
 using Speeding.Infraction.Management.AF01.Models;
 using System;
 using System.Collections.Generic;
@@ -44,7 +45,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
             StorageBlobCreatedEventData blobCreatedEventData =
               ((JObject)eventGridEvent.Data).ToObject<StorageBlobCreatedEventData>();
 
-            string blobName = GetBlobName(blobCreatedEventData.Url);
+            string blobName = BlobHelper.GetBlobName(blobCreatedEventData.Url);
             
             CustomEventData customEventData = new CustomEventData
             {
@@ -88,11 +89,5 @@ namespace Speeding.Infraction.Management.AF01.Functions
                                                                                                                                                                                                                                                              
         }
 
-        public string GetBlobName(string blobUrl)
-        {
-
-            return Path.GetFileNameWithoutExtension(blobUrl);
-
-        }
     }
 }
