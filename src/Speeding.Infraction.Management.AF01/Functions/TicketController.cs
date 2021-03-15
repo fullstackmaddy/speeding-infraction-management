@@ -40,6 +40,14 @@ namespace Speeding.Infraction.Management.AF01.Functions
             CustomEventData inputEventData =
                         ((JObject)eventGridEvent.Data).ToObject<CustomEventData>();
 
+            CustomEventData outputEventData = new CustomEventData
+            {
+                ImageUrl = inputEventData.ImageUrl,
+                TicketNumber = inputEventData.TicketNumber,
+                DistrictOfInfraction = inputEventData.DistrictOfInfraction,
+                DateOfInfraction = inputEventData.DateOfInfraction
+            };
+
             var correlationId = LoggingHelper.GetCorrelationId(inputEventData);
 
             #region Logging
@@ -70,6 +78,8 @@ namespace Speeding.Infraction.Management.AF01.Functions
                     )
                     .ConfigureAwait(false);
 
+                outputEventData.CustomEvent = CustomEvent.SpeedingTicketCreated.ToString();
+
                 #region Logging
 
                 logger.LogInformation(
@@ -87,15 +97,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
             catch (Exception ex)
             {
 
-                CustomEventData customEventData = new CustomEventData
-                {
-                    ImageUrl = inputEventData.ImageUrl,
-                    TicketNumber = inputEventData.TicketNumber,
-                    CustomEvent = CustomEvent.Exceptioned.ToString()
-                };
-
-                await _eventHandler.PublishEventToTopicAsync(customEventData)
-                .ConfigureAwait(false);
+                outputEventData.CustomEvent = CustomEvent.Exceptioned.ToString();
 
                 #region Logging
 
@@ -111,7 +113,12 @@ namespace Speeding.Infraction.Management.AF01.Functions
 
                 #endregion
 
+               
+
             }
+
+            await _eventHandler.PublishEventToTopicAsync(outputEventData)
+               .ConfigureAwait(false);
 
         }
 

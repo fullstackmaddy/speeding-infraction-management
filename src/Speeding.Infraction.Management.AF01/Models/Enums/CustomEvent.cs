@@ -8,6 +8,7 @@ namespace Speeding.Infraction.Management.AF01.Models
     {
         NumberExtractionCompleted,
         FaceDetectionAndBlurringCompleted,
+        SpeedingTicketCreated,
         Exceptioned
     }
 }
