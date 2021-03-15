@@ -102,7 +102,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
                         infractionDistrict: speedingTicket.District
                      );
 
-                await _ownerNotificationHandlerMan
+                await _ownerNotificationHandler
                     .NotifyOwnerAsync(notificationMessage)
                     .ConfigureAwait(false);
 
