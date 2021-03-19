@@ -4,7 +4,9 @@ using Speeding.Infraction.Management.AF01.Handlers.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -105,14 +107,60 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
         public string ParseReadResult(ReadOperationResult result)
         {
             var detectedTexts = result.AnalyzeResult.ReadResults;
+            
 
-            if (detectedTexts.Count != 1)
-                return string.Empty;
+            string registrationNumber = string.Empty;
 
-            if (detectedTexts[0].Lines.Count != 1)
-                return string.Empty;
 
-            return detectedTexts[0].Lines[0].Text;
+            foreach (var detectedText in detectedTexts)
+            {
+                foreach (var line in detectedText.Lines)
+                {
+                    //Sanitize text
+                    var text = SanitizeExtractedText(line.Text);
+
+                    //Check if the text is alphanumeric
+
+                    if (IsExtractedTextAlphaNumeric(text))
+                    {
+                        registrationNumber = text;
+                        break;
+                    }
+
+                }
+
+                if (!string.IsNullOrWhiteSpace(registrationNumber))
+                {
+                    break;
+                }
+
+            }
+            return registrationNumber;
+            
+        }
+
+
+        public string SanitizeExtractedText(string text)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < text.Length; i++)
+            {
+                if ((text[i] >= '0' && text[i] <= '9')
+                    || (text[i] >= 'A' && text[i] <= 'z'))
+                {
+                    sb.Append(text[i]);
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        public bool IsExtractedTextAlphaNumeric(string text)
+        {
+            Regex validationexpression = new Regex("^([A-Z]+[0-9][A-Z0-9]*)|([0-9]+[A-Z][A-Z0-9]*)$");
+
+            return validationexpression.IsMatch(text);
+
             
         }
 

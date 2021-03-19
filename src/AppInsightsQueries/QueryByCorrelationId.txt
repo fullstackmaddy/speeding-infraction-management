@@ -1,0 +1,12 @@
+traces 
+| sort by timestamp desc
+| where customDimensions.EventId > 1
+| where customDimensions.prop__CorrelationId == "{enter correlationId here}" 
+| order by toint(customDimensions.prop_EventId) asc
+| project  Level = customDimensions.LogLevel 
+           , EventId = customDimensions.EventId
+           , EventDescription = customDimensions.prop__EventDescription
+           , ProcessingWorkflow = customDimensions.prop__ProcessingFunction
+           , CorrelationId = customDimensions.prop__CorrelationId
+           , Status = customDimensions.prop__Status
+           , LogMessage = customDimensions.prop__LogMessage
