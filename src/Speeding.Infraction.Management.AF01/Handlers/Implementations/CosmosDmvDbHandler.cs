@@ -38,28 +38,20 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Implementations
                     collectionId: _options.OwnersCollection
                 );
 
-            SqlQuerySpec sqlQuerySpec = new SqlQuerySpec
-            {
-                QueryText = "Select * FROM RegisteredOwners o Where o.vehicleRegistrationNumber = @vehicleRegistrationNumber OFFSET 0 LIMIT 1",
-                Parameters = new SqlParameterCollection()
-                {
-                    new SqlParameter("@vehicleRegistrationNumber", vehicleRegistrationNumber)
-                }
-            };
 
-            FeedOptions feedOptions = new FeedOptions
-            {
-                EnableCrossPartitionQuery = true
-            };
+            var documentquery = await Task.Factory.StartNew(
+               () => _documentClient.CreateDocumentQuery<VehicleOwnerInfo>(
+                   collectionUri,
+                   new FeedOptions
+                   {
+                       MaxItemCount = 1,
+                       EnableCrossPartitionQuery = true
+                   }
+               )
+               .Where(x => x.VehicleRegistrationNumber == vehicleRegistrationNumber))
+               .ConfigureAwait(false);
 
-            var query = await Task.Factory.StartNew(
-                    () => _documentClient.CreateDocumentQuery<VehicleOwnerInfo>(
-                        collectionUri,
-                        feedOptions
-                ))
-                .ConfigureAwait(false);
-
-            return query.ToList()[0];
+            return documentquery.ToList()[0];
 
         }
 
