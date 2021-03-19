@@ -1,0 +1,52 @@
+name: production-deployment-pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+    - '**/*.md'
+    - '**/*.gitignore'
+    - '**/testassets'
+
+env:
+  AZURE_FUNCTIONAPP_NAME: your-app-name  # set this to your application's name
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'    # set this to the path to your web app project, defaults to the repository root
+  DOTNET_VERSION: '3.1.x' 
+  AZURE_FUNCTION_PACKAGE_PATH: "./publishedoutput"
+  SOLUTIONPATH: src/Speeding.Infraction.Management.sln
+  CONFIGURATION : Release
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: prod
+      url: ${{steps.deploy_prod.outputs.app-url}}
+    runs-on: windows-latest
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup dot net
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{env.DOTNET_VERSION}}
+      
+      - name: Build code
+        run: dotnet build ${{env.SOLUTIONPATH}}
+
+      
+      - name: Publish app for deployment
+        run: |
+          dotnet publish ${{env.SOLUTIONPATH}} --configuration ${{env.CONFIGURATION}} --output ${{env.AZURE_FUNCTION_PACKAGE_PATH}} --no-build
+      
+      - name: Deploy Azure Function
+        uses: Azure/functions-action@v1
+        id: deploy_prod
+        with:
+          app-name: ${{env.AZURE_FUNCTIONAPP_NAME}}
+          package: ${{env.AZURE_FUNCTION_PACKAGE_PATH}}
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+  
+  
