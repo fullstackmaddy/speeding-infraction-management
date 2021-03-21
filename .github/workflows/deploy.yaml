@@ -16,12 +16,11 @@ env:
   AZURE_FUNCTION_PACKAGE_PATH: "./publishedoutput"
   SOLUTIONPATH: src/Speeding.Infraction.Management.sln
   CONFIGURATION : Release
+  PRODUCTION_SWAP_SLOT_NAME: warmup
+  RESOURCE_GROUP_NAME: rg-dev-stories-dotnet-demo-dev-01
 
 jobs:
-  build-and-deploy:
-    environment:
-      name: production
-      url: ${{steps.deploy_prod.outputs.app-url}}
+  build-and-deploy-to slot:
     runs-on: windows-latest
     steps:
 
@@ -53,9 +52,30 @@ jobs:
           app-name: ${{env.AZURE_FUNCTIONAPP_NAME}}
           package: ${{env.AZURE_FUNCTION_PACKAGE_PATH}}
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          slot-name:  ${{env.PRODUCTION_SWAP_SLOT_NAME}}
       
       - name: Logout from Azure
         shell: bash
         run: az logout
+  
+  swap-slots:
+    environment:
+      name: production
+      url: ${{steps.deploy_prod.outputs.app-url}}
+      runs-on: windows-latest
+      steps: 
+
+        - name: Login to Azure
+          uses: Azure/login@v1
+          with:
+            creds: ${{secrets.AZURE_CREDENTIALS}}
+
+        - name: Swap Slots
+          run: |
+            az functionapp deployment slot swap  -g ${{env.RESOURCE_GROUP_NAME}} -n ${{env.AZURE_FUNCTIONAPP_NAME}} --slot warmup --target-slot production
+        
+        - name: Log out of Azure
+          run: |
+            az logout
   
   
