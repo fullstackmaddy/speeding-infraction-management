@@ -8,6 +8,11 @@ namespace Speeding.Infraction.Management.AF01.Handlers.Interfaces
 {
     public interface IEventHandler
     {
+        /// <summary>
+        /// Publish a custom event to the event sink
+        /// </summary>
+        /// <param name="customEventData">Customn Event Data</param>
+        /// <returns></returns>
         public Task PublishEventToTopicAsync(CustomEventData customEventData);
     }
 }

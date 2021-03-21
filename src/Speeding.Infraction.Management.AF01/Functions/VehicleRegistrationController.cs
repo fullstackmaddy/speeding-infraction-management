@@ -107,7 +107,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
 
                     #region Logging
 
-                    logger.LogInformation(
+                    logger.LogError(
                         new EventId((int)LoggingConstants.EventId.ExtractRegistrationNumberFinished),
                         LoggingConstants.Template,
                         LoggingConstants.EventId.ExtractRegistrationNumberFinished.ToString(),
@@ -127,7 +127,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
 
                 #region Logging
 
-                logger.LogInformation(
+                logger.LogError(
                     new EventId((int)LoggingConstants.EventId.ExtractRegistrationNumberFinished),
                     LoggingConstants.Template,
                     LoggingConstants.EventId.ExtractRegistrationNumberFinished.ToString(),
