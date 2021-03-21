@@ -20,7 +20,7 @@ env:
 jobs:
   build-and-deploy:
     environment:
-      name: prod
+      name: production
       url: ${{steps.deploy_prod.outputs.app-url}}
     runs-on: windows-latest
     steps:
