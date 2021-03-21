@@ -126,7 +126,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
 
                 #region Logging
 
-                logger.LogError(
+                logger.LogInformation(
                     new EventId((int)LoggingConstants.EventId.DetectAndBlurFacesFinished),
                     LoggingConstants.Template,
                     LoggingConstants.EventId.DetectAndBlurFacesFinished.ToString(),

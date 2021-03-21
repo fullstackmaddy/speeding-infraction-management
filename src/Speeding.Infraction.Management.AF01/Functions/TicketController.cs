@@ -101,7 +101,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
 
                 #region Logging
 
-                logger.LogError(
+                logger.LogInformation(
                     new EventId((int)LoggingConstants.EventId.CreateSpeedingTicketFinished),
                     LoggingConstants.Template,
                     LoggingConstants.EventId.CreateSpeedingTicketFinished.ToString(),

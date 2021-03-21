@@ -135,7 +135,7 @@ namespace Speeding.Infraction.Management.AF01.Functions
 
                 #region Logging
 
-                logger.LogError(
+                logger.LogInformation(
                     new EventId((int)LoggingConstants.EventId.NotifyVehicleOwnerFinished),
                     LoggingConstants.Template,
                     LoggingConstants.EventId.NotifyVehicleOwnerFinished.ToString(),
